@@ -1,0 +1,2287 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我们的故事 · 他的视角</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+        
+    <style>
+        /* 状态指示器 */
+        .status-indicator {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 10px 15px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            z-index: 1000;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .status-indicator.show {
+            opacity: 1;
+        }
+
+        .status-success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        :root {
+            --primary-color: #4a6fa5; /* 男生系蓝色 */
+            --secondary-color: #6b8cbc;
+            --accent-color: #ff9a8b; /* 温暖点缀色 */
+            --light-bg: #f8fafc;
+            --dark-text: #2d3748;
+            --light-text: #718096;
+            --cat-color: #FFB6C1; /* 小猫粉色 */
+            --fox-color: #FFA500; /* 狐狸橙色 */
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Microsoft YaHei", sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #e4edf5 100%);
+            color: var(--dark-text);
+            line-height: 1.8;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        /* 页眉样式 */
+        .header {
+            text-align: center;
+            padding: 40px 20px 30px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 0 0 20px 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 20px rgba(74, 111, 165, 0.2);
+        }
+
+        .header h1 {
+            font-size: 2.8rem;
+            margin-bottom: 10px;
+            font-weight: 300;
+            letter-spacing: 2px;
+        }
+
+        .header .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            font-weight: 300;
+        }
+
+        /* 时间线容器 */
+        .timeline {
+            position: relative;
+            padding: 20px 0;
+        }
+
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 2px;
+            height: 100%;
+            background: var(--secondary-color);
+            opacity: 0.3;
+        }
+
+        /* 时间线项目 */
+        .timeline-item {
+            display: flex;
+            margin-bottom: 50px;
+            position: relative;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeInUp 0.8s ease forwards;
+        }
+
+        .timeline-item:nth-child(odd) {
+            flex-direction: row-reverse;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 20px;
+            height: 20px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            border: 4px solid white;
+            box-shadow: 0 0 0 4px var(--accent-color);
+            z-index: 2;
+        }
+
+        .timeline-content {
+            width: calc(50% - 40px);
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.08);
+            position: relative;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .timeline-content:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.12);
+        }
+
+        .timeline-content::before {
+            content: '';
+            position: absolute;
+            top: 20px;
+            width: 0;
+            height: 0;
+            border-style: solid;
+        }
+
+        .timeline-item:nth-child(odd) .timeline-content::before {
+            right: -10px;
+            border-width: 10px 0 10px 10px;
+            border-color: transparent transparent transparent white;
+        }
+
+        .timeline-item:nth-child(even) .timeline-content::before {
+            left: -10px;
+            border-width: 10px 10px 10px 0;
+            border-color: transparent white transparent transparent;
+        }
+
+        .timeline-date {
+            color: var(--primary-color);
+            font-size: 0.9rem;
+            font-weight: 600;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timeline-title {
+            color: var(--dark-text);
+            font-size: 1.4rem;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .timeline-text {
+            color: var(--light-text);
+            line-height: 1.8;
+            text-align: justify;
+        }
+
+        /* 可评论文本样式 */
+        .commentable-text {
+            cursor: pointer;
+            padding: 2px 4px;
+            border-radius: 3px;
+            transition: all 0.3s ease;
+            position: relative;
+            border-bottom: 1px dashed transparent;
+        }
+
+        .commentable-text:hover {
+            background-color: rgba(255, 154, 139, 0.2);
+            box-shadow: 0 0 0 2px rgba(255, 154, 139, 0.3);
+            border-bottom-color: var(--accent-color);
+        }
+
+        .commentable-text.selected {
+            background-color: rgba(255, 154, 139, 0.4);
+            box-shadow: 0 0 0 2px var(--accent-color);
+        }
+
+        /* 评论弹窗样式 */
+        .comment-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .comment-modal.active {
+            display: flex;
+        }
+
+        .comment-modal-content {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+
+        .comment-modal-header {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .comment-modal-header h3 {
+            color: var(--primary-color);
+            margin-bottom: 10px;
+        }
+
+        .selected-text-preview {
+            background-color: #f8f9fa;
+            border-left: 4px solid var(--accent-color);
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 5px;
+            font-style: italic;
+        }
+
+        .author-selection {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            justify-content: center;
+        }
+
+        .author-option {
+            flex: 1;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .author-option:hover {
+            border-color: var(--accent-color);
+            transform: translateY(-3px);
+        }
+
+        .author-option.selected {
+            border-color: var(--accent-color);
+            background-color: rgba(255, 154, 139, 0.1);
+        }
+
+        .author-option.cat {
+            border-color: var(--cat-color);
+        }
+
+        .author-option.cat.selected {
+            background-color: rgba(255, 182, 193, 0.2);
+        }
+
+        .author-option.fox {
+            border-color: var(--fox-color);
+        }
+
+        .author-option.fox.selected {
+            background-color: rgba(255, 165, 0, 0.2);
+        }
+
+        .author-icon {
+            font-size: 2rem;
+            margin-bottom: 8px;
+            display: block;
+        }
+
+        .author-name {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .comment-textarea {
+            width: 100%;
+            min-height: 120px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1rem;
+            resize: vertical;
+            margin-bottom: 20px;
+            transition: border-color 0.3s ease;
+        }
+
+        .comment-textarea:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(255, 154, 139, 0.2);
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+        }
+
+        .modal-btn {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .modal-btn.cancel {
+            background-color: #f1f3f4;
+            color: #5f6368;
+        }
+
+        .modal-btn.cancel:hover {
+            background-color: #dadce0;
+        }
+
+        .modal-btn.submit {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .modal-btn.submit:hover {
+            background-color: #ff7a6b;
+            transform: translateY(-2px);
+        }
+
+        .modal-btn.submit:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        /* 侧边评论气泡 */
+        .side-comment {
+            position: absolute;
+            background: white;
+            border-radius: 12px;
+            padding: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.15);
+            max-width: 300px;
+            z-index: 100;
+            animation: commentAppear 0.3s ease-out;
+            border: 2px solid;
+        }
+
+        @keyframes commentAppear {
+            from {
+                opacity: 0;
+                transform: scale(0.8) translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .side-comment.cat {
+            border-color: var(--cat-color);
+        }
+
+        .side-comment.fox {
+            border-color: var(--fox-color);
+        }
+
+        .side-comment::before {
+            content: '';
+            position: absolute;
+            width: 0;
+            height: 0;
+            border-style: solid;
+        }
+
+        .side-comment.left::before {
+            right: -12px;
+            top: 20px;
+            border-width: 12px 0 12px 12px;
+        }
+
+        .side-comment.cat.left::before {
+            border-color: transparent transparent transparent var(--cat-color);
+        }
+
+        .side-comment.fox.left::before {
+            border-color: transparent transparent transparent var(--fox-color);
+        }
+
+        .side-comment.right::before {
+            left: -12px;
+            top: 20px;
+            border-width: 12px 12px 12px 0;
+        }
+
+        .side-comment.cat.right::before {
+            border-color: transparent var(--cat-color) transparent transparent;
+        }
+
+        .side-comment.fox.right::before {
+            border-color: transparent var(--fox-color) transparent transparent;
+        }
+
+        .comment-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+            position: relative;
+            padding-right: 25px;
+        }
+
+        .comment-author-icon {
+            font-size: 1.2rem;
+            margin-right: 8px;
+        }
+
+        .comment-author-name {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+
+        .comment-content {
+            font-size: 0.95rem;
+            line-height: 1.5;
+            color: var(--dark-text);
+        }
+
+        .comment-time {
+            font-size: 0.75rem;
+            color: var(--light-text);
+            margin-top: 8px;
+            text-align: right;
+        }
+
+        /* 删除按钮样式 */
+        .delete-comment-btn {
+            position: absolute;
+            top: 8px;
+            right: 8px;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: rgba(0, 0, 0, 0.1);
+            border: none;
+            color: #666;
+            font-size: 16px;
+            line-height: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            opacity: 0;
+        }
+
+        .side-comment:hover .delete-comment-btn {
+            opacity: 1;
+        }
+
+        .delete-comment-btn:hover {
+            background: #ff6b6b;
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* 聊天记录样式 */
+        .chat-bubble {
+            max-width: 80%;
+            padding: 12px 18px;
+            border-radius: 18px;
+            margin: 10px 0;
+            position: relative;
+            font-size: 0.95rem;
+        }
+
+        .chat-left {
+            background: #e6f7ff;
+            align-self: flex-start;
+            border-bottom-left-radius: 5px;
+        }
+
+        .chat-right {
+            background: var(--primary-color);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 5px;
+            margin-left: auto;
+        }
+
+        .chat-time {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-top: 5px;
+            text-align: right;
+        }
+
+        /* 照片墙 */
+        .photo-wall {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+            margin: 30px 0;
+        }
+
+        .photo-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            height: 200px;
+        }
+
+        .photo-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .photo-item:hover img {
+            transform: scale(1.05);
+        }
+
+        .photo-caption {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px;
+            font-size: 0.9rem;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+        }
+
+        .photo-item:hover .photo-caption {
+            transform: translateY(0);
+        }
+
+        /* 特殊段落样式 */
+        .highlight-box {
+            background: linear-gradient(135deg, #f0f7ff, #e6f0ff);
+            border-left: 4px solid var(--accent-color);
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 8px;
+        }
+
+        .memory-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin: 20px 0;
+            padding: 15px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.05);
+        }
+
+        .memory-icon {
+            width: 40px;
+            height: 40px;
+            background: var(--accent-color);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            flex-shrink: 0;
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .timeline::before {
+                left: 20px;
+            }
+            
+            .timeline-item {
+                flex-direction: row !important;
+                margin-left: 40px;
+            }
+            
+            .timeline-dot {
+                left: 20px;
+            }
+            
+            .timeline-content {
+                width: 100%;
+            }
+            
+            .timeline-content::before {
+                display: none;
+            }
+            
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .photo-wall {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .side-comment {
+                max-width: 250px;
+                left: auto !important;
+                right: 20px !important;
+            }
+            
+            .side-comment::before {
+                display: none;
+            }
+        }
+
+        /* 动画 */
+        @keyframes fadeInUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* 页脚 */
+        .footer {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 50px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: 20px 20px 0 0;
+            position: relative;
+            z-index: 1;
+        }
+
+        .footer-text {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            max-width: 600px;
+            margin: 0 auto 20px;
+        }
+
+        .heart-beat {
+            color: var(--accent-color);
+            font-size: 2rem;
+            animation: heartbeat 1.2s infinite;
+        }
+
+        
+        /* 新增：编辑器CSS样式 */
+        .timeline-editor {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            z-index: 9999;
+        }
+
+        .editor-toggle {
+            background: var(--accent-color);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 20px rgba(255, 154, 139, 0.5);
+            transition: all 0.3s ease;
+            font-size: 1rem;
+            font-weight: 600;
+            border: none;
+            outline: none;
+        }
+
+        .editor-toggle:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(255, 154, 139, 0.7);
+            background: #ff7a6b;
+        }
+
+        .editor-panel {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.3);
+            width: 400px;
+            margin-top: 15px;
+            display: none;
+            animation: slideUp 0.3s ease;
+            border: 2px solid rgba(255, 154, 139, 0.2);
+            max-height: 60vh;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .editor-panel.active {
+            display: block;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .editor-form .form-group {
+            margin-bottom: 20px;
+        }
+
+        .editor-form label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: var(--dark-text);
+        }
+
+        .editor-form input,
+        .editor-form textarea,
+        .editor-form select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .editor-form input:focus,
+        .editor-form textarea:focus,
+        .editor-form select:focus {
+            outline: none;
+            border-color: var(--accent-color);
+        }
+
+        .editor-buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: flex-end;
+            margin-top: 25px;
+        }
+
+        .btn-primary {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #ff7a6b;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #f1f3f4;
+            color: #5f6368;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-secondary:hover {
+            background: #dadce0;
+        }
+
+        /* 删除按钮样式 */
+        .btn-delete {
+            background: #ff6b6b;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            margin-right: auto;
+        }
+
+        .btn-delete:hover {
+            background: #ff5252;
+            transform: translateY(-2px);
+        }
+
+        /* 编辑按钮样式 */
+        .edit-item-btn {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: rgba(255, 154, 139, 0.2);
+            border: 1px solid var(--accent-color);
+            color: var(--accent-color);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+
+        .timeline-content:hover .edit-item-btn {
+            opacity: 1;
+        }
+
+        .edit-item-btn:hover {
+            background: var(--accent-color);
+            color: white;
+            transform: scale(1.1);
+        }
+
+        /* 响应式设计 */
+        @media (max-width: 768px) {
+            .editor-panel {
+                width: calc(100vw - 40px);
+                right: 20px;
+                left: 20px;
+            }
+        }
+        
+        /* 原有的页脚动画样式保持不变 */
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 页眉 -->
+        <header class="header">
+            <h1>我们的故事</h1>
+            <div class="subtitle">记录每一刻心动</div>
+        </header>
+                 <!-- 状态指示器 -->
+        <div class="status-indicator" id="statusIndicator"></div>
+        <!-- 时间线开始 -->
+        <div class="timeline">
+            <!-- 2021年2月 - 初识 -->
+            <div class="timeline-item" style="animation-delay: 0.1s" data-item-id="item-1">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">
+                        <i class="fas fa-calendar-alt"></i>
+                        2025年2月16日
+                    </div>
+                    <h3 class="timeline-title">你加上我的微信</h3>
+                    <div class="timeline-text">
+                        <p>那还是上一个寒假。你说你是硬件组和建模组的成员，向我了解实验设计的部分。但其实我早就注意到你了——在大一上的英语课，我在一众同学的塑料英语中猛地听到你的声音，<span class="commentable-text" data-text-id="text-1-1">标准而优雅，一下就抓住了我的注意</span>。</p>
+                        
+                        <div class="chat-bubble chat-left">
+                            下午好，想问问你们这个项目中工程菌凝絮和金属离子处理完的先后是怎样的呢，因为如果金属离子处理完了工程菌还没有开始凝聚的话，是不是就无法凝聚了，还有SmtA蛋白被设计成定位在外膜了，这个蛋白吸附金属离子，那CueR，NikR，ChrA蛋白在细胞内，怎样与金属离子结合呢，编码这些蛋白的基因的启动子是强的组成型启动子吗
+                        </div>
+                        
+                        <div class="chat-bubble chat-right">
+                            下午好，如果金属离子处理完了工程菌还没有开始凝聚的话，是不是就无法凝聚了。对于这个问题我之前没有考虑到，我觉得有可能出现这样的问题。但在如珠江水域中污染程度较高的区域里，其铜离子浓度大概在10 μM左右，而检测系统可能的最低阈值大约在个位数水平。
+                        </div>
+                        
+                        <p><span class="commentable-text" data-text-id="text-1-2">多么正式的发言啊，这很符合我对你的印象，一个有耐心而专注的人才会练出这么标准的英语发音</span>。你说的话和我想的是一样的，我有些紧张了，生怕自己回答不上你的问题。</p>
+                        
+                        <div class="highlight-box">
+                            <span class="commentable-text" data-text-id="text-1-3">我承认，我过了20多分钟才回答你，不是因为我才看见，而是因为我想回答的更完美一点。</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 相熟 -->
+            <div class="timeline-item" style="animation-delay: 0.3s" data-item-id="item-2">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">
+                        <i class="fas fa-calendar-alt"></i>
+                        2025年5月28日
+                    </div>
+                    <h3 class="timeline-title">perl的趣事</h3>
+                    <div class="timeline-text">
+                        <p>我很高兴我和你在同一节perl的课上，这堂课人不多，我总坐在你的左后方，这样可以<span class="commentable-text" data-text-id="text-2-1">偷偷瞟你几眼</span></p>
+                        
+                        <div class="memory-item">
+                            <div class="memory-icon">
+                                <i class="fas fa-flask"></i>
+                            </div>
+                            <div>
+                                <strong>突来的询问</strong><br>
+                                你询问我pm文件是做什么用的，我向你解释了一下pm模块的概念。<span class="commentable-text" data-text-id="text-2-2">你很快明白了我要做什么。于是为我们后续的讨论也奠定了基础</span>。我们继续讨论了很多perl的程序，我甚至登上了你的perl账号，你也没有反对，这是一个好的开始。
+                                <p>我在此之后向你寻求了物理笔记，你是如此的好心，足足给了我99页。qwq</p>
+                            </div>
+                        </div>
+                            
+                       <div class="memory-item">
+                            <div class="memory-icon">
+                                <i class="fas fa-utensils"></i>
+                            </div>
+                            <div>
+                                <strong>写perl的大作业</strong><br>
+                                2025年6月9日
+                            </div>
+                        </div>
+                        
+                        <div class="chat-bubble chat-left">
+                            朱嘉茗你睡了吗，可以帮个忙吗，你知道怎么传两个哈希变量吗？
+                        </div>
+                        <div class="chat-bubble chat-right">
+                            我正打算睡了，不过还没有。直接发我程序和需求吧，我试试速战速决，话说很急么？
+                        </div>
+                        <div class="chat-bubble chat-left">
+                            急，该很快
+                        </div>
+                        <p>于是我开始写代码，写着写着发现了少了点东西，我就向你询问可是没有回复，我很着急，我想你每次得不到我回复的时候应该和我是一样着急的，我在这里和你道个歉.<p>    
+                        <p>在你回复我后我得知你是去洗澡了，我开始排查问题，发现是wyb少放了一个文件，我以为我解决完毕了。</p>
+                        <div class="chat-bubble chat-right">
+                            应该可以了，我先睡了
+                        </div>
+                        <div class="chat-bubble chat-left">
+                            可以运行了，它的开始有这个问题
+                        </div>
+                        <div class="chat-bubble chat-right">
+                            我先不睡
+                        </div>
+                        
+                        <p><span class="commentable-text" data-text-id="text-2-3">我继续的修改下去，很高兴还是较快的搞定了问题，得以睡觉了</span>。之后我非常的惊讶的发现你们在演讲时把我放在了指导老师的位置。</p>    
+                    </div>
+                </div>
+            </div>
+
+            <!-- 心动 -->
+            <div class="timeline-item" style="animation-delay: 0.5s" data-item-id="item-3">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">
+                        <i class="fas fa-calendar-alt"></i>
+                        暑假
+                    </div>
+                    <h3 class="timeline-title">第一次心跳加速</h3>
+                    <div class="timeline-text">
+                        <p>在暑假，那天晚上我们四个人玩着扑克于实验楼小酌</p>
+                        
+                        <div class="highlight-box">
+                            <span class="commentable-text" data-text-id="text-3-1">当时我是如此的激动，我不知道是我喝多了酒吗？还是感受到了喜欢的女孩子与我有一丝可能？毕竟之前的事情让我觉得你完全是不喜欢我的。我很激动，忍不住站起来又坐下，就像是感到春天的种子想要伸出芽。</span>
+                        </div>
+                        
+                        <p>那天晚上我是如此的傻，想扶你回宿舍却又担心你嫌弃我，于是拿出了一把伞问你要不要扶着伞走。<span class="commentable-text" data-text-id="text-3-2">现在想想要被自己蠢笑了，我不大记得发生了什么，但我收起了那把可笑的伞，亲手扶着你回宿舍。</span></p>
+                        
+                        <div class="chat-bubble chat-right" style="margin-top: 15px;">
+                            安全到宿舍了吗？
+                        </div>
+                        
+                        <div class="chat-bubble chat-left">
+                            我们两个现在已经到了宿舍，准备去洗澡。（这句话说了10秒）
+                        </div>
+                        
+                        <div class="chat-bubble chat-right">
+                            感觉我成战犯了，我建议你明天听一下这个语音
+                        </div>
+                        <div class="chat-bubble chat-right" style="margin-top: 15px;">
+                            700*0.08=56，以后别到这个量。你上床也小心点，别掉下来了
+                        </div>
+                        
+                        <div class="chat-bubble chat-left">
+                           我跟你说朱嘉茗。哦，我今天去晨曦宿舍洗的澡，晨曦宿舍的花洒的头是黑色的。我们宿舍的花洒头也是白色的。我当时看到陈曦宿舍的花草都是黑色的，我觉得很神奇。（这两句话说了34秒）
+                        </div>
+                        
+                        <div class="chat-bubble chat-right">
+                            好的，不要着急，你早点休息。
+                        </div>
+                        <div class="chat-bubble chat-left">
+                           我已经吹完了，我感觉我快受不了了。我现在正要睡觉了，你们也早点睡吧。
+                        </div>
+                        
+                        <div class="chat-bubble chat-right">
+                            okok，晚安。（这也许是第一次我和你说晚安）
+                        </div>
+                        <p><span class="commentable-text" data-text-id="text-3-3">还好第二天你就恢复了，不然我可真就成了罪人。不过小猫老是想着喝酒，好像一直以为自己还能喝的更多，我实在是有些担心。</span></p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 确认 -->
+            <div class="timeline-item" style="animation-delay: 0.7s" data-item-id="item-4">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">
+                        <i class="fas fa-calendar-alt"></i>
+                        暑假末期
+                    </div>
+                    <h3 class="timeline-title">700×0.08=56</h3>
+                    <div class="timeline-text">
+                        <p>之后的进展就很飞速了，现在想想也有些美好的如梦似换。</p>
+                        
+                        <div class="memory-item">
+                            <div class="memory-icon">
+                                <i class="fas fa-calculator"></i>
+                            </div>
+                            <div>
+                                <strong>再回宿舍</strong><br>
+                                我和你在晚上从实验室走出，快到海7时我紧张极了，但还是下定决心不走进海7，而是陪着你向山上走去。<br>
+                                <span class="commentable-text" data-text-id="text-4-1">我们看了小猫，给皮卡与小猫拍了照片。这目前算是我的高水平之作了，不过我觉得之后肯定会有同样好的照片。</span>
+                            </div>
+                        </div>
+                        <div class="photo-item" style="height: 300px; margin: 20px 0; border-radius: 10px; overflow: hidden;">
+                            <img src="小猫与小猫.jpg" alt="皮卡与小猫的合影" style="width: 100%; height: 100%; object-fit: cover;">
+                            <div class="photo-caption">皮卡与小猫的合影哦</div>
+                        </div>
+                        <p><span class="commentable-text" data-text-id="text-4-2">这一刻，我知道你同样也认可了我。我之前被你打击到的心又死灰复燃了，我知道我喜欢你，但现在我敢于喜欢你了</span></p>
+                        
+                        <p>我想起我在3月多的时候给我的朋友说同年级有一个优秀的女生，他问我是不是喜欢人家，我没说只是发给了他一张你朋友圈的照片。<span class="commentable-text" data-text-id="text-4-3">现在我想我可以大胆的说出口了。</span></p>
+                        
+                        <div class="highlight-box">
+                            <span class="commentable-text" data-text-id="text-4-4">我想了一下，又似乎想了很久。是的，我喜欢你。喜欢你做实验时的专注，喜欢你帮我拍物理作业时的耐心，喜欢你讨论问题时的认真，也喜欢你勤于学习的刻苦。我想起那次看见你捡起地上的纸团丢进垃圾桶，你是我生命中最亮的光，而我想要靠近这束光。</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 在一起 -->
+            <div class="timeline-item" style="animation-delay: 0.9s" data-item-id="item-5">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">
+                        <i class="fas fa-calendar-alt"></i>
+                        2025年9月
+                    </div>
+                    <h3 class="timeline-title">我们在一起</h3>
+                    <div class="timeline-text">
+                        <p>我想要正式向你说一声，我喜欢你。于是我约你去情侣路。<span class="commentable-text" data-text-id="text-5-1">我是如此的笨拙，取出戒指都花了太长的时间，以至于忘记了要说什么，还是在你的提醒下才响了起来。</span></p>
+                        
+                        <div class="photo-wall">
+                            <!-- 真实照片墙 -->
+                            <div class="photo-item">
+                                <img src="小猫的礼物.png" alt="小猫的礼物" style="width: 100%; height: 100%; object-fit: cover;">
+                                <div class="photo-caption">给小猫的礼物</div>
+                            </div>
+                            <div class="photo-item">
+                                <img src="小猫张嘴.jpg" alt="小猫张嘴" style="width: 100%; height: 100%; object-fit: cover;">
+                                <div class="photo-caption">小猫张嘴，之后就喜欢让小猫张嘴</div>
+                            </div>
+                            <div class="photo-item">
+                                <img src="偷拍小猫.png" alt="偷拍小猫" style="width: 100%; height: 100%; object-fit: cover;">
+                                <div class="photo-caption">偷拍小猫</div>
+                            </div>
+                            <div class="photo-item">
+                                <img src="小猫的蛋糕.jpg" alt="小猫的蛋糕" style="width: 100%; height: 100%; object-fit: cover;">
+                                <div class="photo-caption">小猫送给我的蛋糕，喜欢小猫</div>
+                            </div>
+                            <div class="photo-item">
+                                <img src="小猫与蜥蜴.jpg" alt="小猫与蜥蜴" style="width: 100%; height: 100%; object-fit: cover;">
+                                <div class="photo-caption">小猫与蜥蜴</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 至今 -->
+            <div class="timeline-item" style="animation-delay: 1.1s" data-item-id="item-6">
+                <div class="timeline-dot"></div>
+                <div class="timeline-content">
+                    <div class="timeline-date">
+                        <i class="fas fa-calendar-alt"></i>
+                        寒假
+                    </div>
+                    <h3 class="timeline-title">我们的异地</h3>
+                    <div class="timeline-text">
+                        <p>在寒假是我们最长的一次异地，我感觉这个寒假我让你过的不太好。</p>
+                        
+                        <div class="memory-item">
+                            <div class="memory-icon">
+                                <i class="fas fa-birthday-cake"></i>
+                            </div>
+                            <div>
+                                <strong>让你感到被忽视</strong><br>
+                                <span class="commentable-text" data-text-id="text-6-1">那天让你因为消息的事难过，我会一直记着。那不是我故意不回应，恰恰是因为你在我心里太重要了，我才怕自己说错话，反倒让你更不舒服，可我偏偏忘了，沉默和假装没发生，才是对你更大的伤害。你说的话我都记在心里了，以后我一定改，不管怎么样，都会好好回应你的情绪，再也不会让你独自胡思乱想。</span>
+                            </div>
+                        </div>
+                        <div class="memory-item">
+                            <div class="memory-icon">
+                                <i class="fas fa-plane"></i>
+                            </div>
+                            <div>
+                                <strong>情人节</strong><br>
+                                <span class="commentable-text" data-text-id="text-6-2">我很抱歉，我本想着和你打电话的时候亲口说情人节快乐，并且和你多聊一聊。但是我没有想到你会睡的这么早，以至于我只能在你睡觉之后再说。我很难过，我应该更多的和你沟通。摆脱我的拖延症，早一点说而免得太迟错过了。</span>
+                            </div>
+                        </div>
+                        
+                        <p style="text-align: center; margin-top: 20px; font-size: 1.2rem;">
+                            <i class="fas fa-heart" style="color: var(--accent-color); margin-right: 10px;"></i>
+                           <span class="commentable-text" data-text-id="text-6-3">我很爱你，从来都不想让你受委屈、觉得痛苦，这些话就当是我迟到的情人节礼物吧。你不用觉得要刻意变得独立，我永远是你的依靠，也希望你依旧可以放心地依赖我，不管什么情绪，都可以毫无保留地告诉我，好吗？</span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- 时间线结束 -->
+
+        <!-- 评论弹窗 -->
+        <div class="comment-modal" id="commentModal">
+            <div class="comment-modal-content">
+                <div class="comment-modal-header">
+                    <h3>添加评论</h3>
+                </div>
+                <div class="selected-text-preview" id="selectedTextPreview">
+                    请选择要评论的文本...
+                </div>
+                <div class="author-selection">
+                    <div class="author-option cat" data-author="cat" onclick="selectAuthor('cat')">
+                        <span class="author-icon">🐱</span>
+                        <span class="author-name">小猫</span>
+                    </div>
+                    <div class="author-option fox" data-author="fox" onclick="selectAuthor('fox')">
+                        <span class="author-icon">🦊</span>
+                        <span class="author-name">狐狸</span>
+                    </div>
+                </div>
+                <textarea class="comment-textarea" id="commentTextarea" placeholder="写下你的评论..."></textarea>
+                <div class="modal-buttons">
+                    <button class="modal-btn cancel" onclick="closeCommentModal()">取消</button>
+                    <button class="modal-btn submit" id="submitCommentBtn" onclick="submitComment()" disabled>发表评论</button>
+                </div>
+            </div>
+        </div>
+        <!-- 新增：时间轴编辑面板 -->
+<div class="timeline-editor" id="timelineEditor">
+    <div class="editor-toggle" onclick="toggleEditor()">
+        <i class="fas fa-plus-circle"></i>
+        <span>添加新节点</span>
+    </div>
+    <div class="editor-panel">
+        <h3>添加新的时间轴节点</h3>
+        <div class="editor-form">
+            <div id="entriesContainer"></div>
+
+            <div style="display:flex;gap:12px;margin-bottom:12px;">
+                <button type="button" class="btn-secondary" onclick="addEntryRow()">添加条目</button>
+                <span style="align-self:center;color:#718096;font-size:0.9rem">可连续添加多个条目，每个条目独立选择类型</span>
+            </div>
+
+            <div class="editor-buttons">
+                <button class="btn-delete" onclick="deleteTimelineItem()" style="display: none;">删除</button>
+                <button class="btn-secondary" onclick="cancelEdit()">取消</button>
+                <button class="btn-primary" onclick="saveNewTimelineItem()">保存</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+        <!-- 页脚 -->
+        <footer class="footer">
+            <div class="footer-text">
+                从一句"下午好"开始的故事，<br>
+                写了大半年，还会写很多很多年。
+            </div>
+            <div class="heart-beat">
+                <i class="fas fa-heart"></i>
+            </div>
+        </footer>
+    </div>
+
+    <script>
+                // ==== JSONBin 配置（已迁移到后端代理） ====
+                // 客户端不再包含 Master Key，所有与 JSONBin 的读写通过后端代理完成。
+                const PROXY_JSONBIN_URL = '/api/jsonbin'; // 后端代理地址
+                // 若希望直接测试不启后端，请将 PROXY_JSONBIN_URL 指向 JSONBin（不推荐暴露 Master Key）
+                // ==== 配置结束 ====
+        // 全局变量
+        let selectedTextId = null;
+        let selectedTextContent = null;
+        let selectedAuthor = null;
+        let currentTimelineItem = null;
+
+        // 页面加载完成后执行所有功能
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. 滚动动画功能
+    const timelineItems = document.querySelectorAll('.timeline-item');
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.style.animationPlayState = 'running';
+            }
+        });
+    }, { threshold: 0.1 });
+    
+    timelineItems.forEach(item => {
+        item.style.animationPlayState = 'paused';
+        observer.observe(item);
+    });
+
+            // 2. 启动爱心雨背景效果
+            startHeartRain();
+            
+            // 3. 初始化可评论文本点击事件
+            initCommentableText();
+            
+            // 4. 初始化评论表单事件
+            initCommentForm();
+            
+            // 5. 加载已有的评论
+            loadComments();
+        });
+
+        // 爱心雨背景效果函数
+        function startHeartRain() {
+            // 创建爱心容器
+            const heartContainer = document.createElement('div');
+            heartContainer.id = 'heart-rain-container';
+            Object.assign(heartContainer.style, {
+                position: 'fixed',
+                top: '0',
+                left: '0',
+                width: '100%',
+                height: '100%',
+                pointerEvents: 'none',
+                zIndex: '1',
+                overflow: 'hidden'
+            });
+            document.body.appendChild(heartContainer);
+
+            // 创建单个爱心的函数
+            function createHeart() {
+                const heart = document.createElement('div');
+                heart.innerHTML = '❤️';
+                Object.assign(heart.style, {
+                    position: 'absolute',
+                    fontSize: (Math.random() * 20 + 25) + 'px', // 增大到25-45px
+                    left: (Math.random() * 100) + '%',
+                    top: '-50px', // 调整起始位置
+                    opacity: Math.random() * 0.5 + 0.3, // 增加透明度范围
+                    pointerEvents: 'none',
+                    userSelect: 'none',
+                    animation: `heartFall ${Math.random() * 4 + 3}s linear forwards`, // 稍微延长动画时间
+                    color: getRandomHeartColor()
+                });
+                
+                heartContainer.appendChild(heart);
+
+                // 动画结束后移除元素
+                setTimeout(() => {
+                    if (heart.parentNode) {
+                        heart.parentNode.removeChild(heart);
+                    }
+                }, 7000); // 延长清理时间
+            }
+
+            // 获取随机爱心颜色
+            function getRandomHeartColor() {
+                const colors = ['#ff6b6b', '#ff8e8e', '#ffb6c1', '#ff9a8b', '#ff7eb3', '#ffc0cb', '#ff1493'];
+                return colors[Math.floor(Math.random() * colors.length)];
+            }
+
+            // 开始定时创建爱心 - 降低频率避免过于密集
+            setInterval(createHeart, 800);
+
+            // 添加CSS动画关键帧
+            const styleSheet = document.createElement('style');
+            styleSheet.textContent = `
+                @keyframes heartFall {
+                    0% {
+                        transform: translateY(0) rotate(0deg);
+                        opacity: 0;
+                    }
+                    10% {
+                        opacity: inherit;
+                    }
+                    90% {
+                        opacity: inherit;
+                    }
+                    100% {
+                        transform: translateY(100vh) rotate(${Math.random() * 1080}deg); // 增加旋转角度
+                        opacity: 0;
+                    }
+                }
+                
+                /* 确保主要内容在爱心之上 */
+                .container, .header, .timeline, .footer {
+                    position: relative;
+                    z-index: 10;
+                }
+            `;
+            document.head.appendChild(styleSheet);
+        }
+
+                // 初始化可评论文本 - 修复版本
+        function initCommentableText() {
+            // 1. 已有的可评论文本
+            const commentableTexts = document.querySelectorAll('.commentable-text');
+            
+            // 2. 为时间线描述段落添加评论功能
+            const timelineParagraphs = document.querySelectorAll('.timeline-text p:not(.commentable-text)');
+            
+            // 3. 为聊天气泡添加评论功能
+            const chatBubbles = document.querySelectorAll('.chat-bubble');
+            
+            // 4. 为记忆项目添加评论功能
+            const memoryItems = document.querySelectorAll('.memory-item');
+            
+            // 合并所有可评论元素
+            const allCommentableElements = [
+                ...commentableTexts, 
+                ...timelineParagraphs, 
+                ...chatBubbles,
+                ...memoryItems
+            ];
+            
+            // 固定ID生成函数
+            function generateStableId(text) {
+                // 简单哈希函数，为文本生成一个简短固定字符串
+                let hash = 0;
+                for (let i = 0; i < text.length; i++) {
+                    hash = ((hash << 5) - hash) + text.charCodeAt(i);
+                    hash |= 0; // 转换为32位整数
+                }
+                // 取绝对值并转为基数为36的短字符串
+                return 'text-' + Math.abs(hash).toString(36).substring(0, 8);
+            }
+            
+            allCommentableElements.forEach((element, index) => {
+                // 为没有data-text-id的元素添加固定ID
+                if (!element.dataset.textId) {
+                    // 使用文本内容生成固定ID（取前100字符避免过长）
+                    const textContent = element.textContent.trim().substring(0, 100);
+                    element.dataset.textId = generateStableId(textContent);
+                }
+                
+                // 添加可评论样式（如果不是span.commentable-text）
+                if (!element.classList.contains('commentable-text') && element.tagName !== 'SPAN') {
+                    element.style.cursor = 'pointer';
+                    element.style.padding = '4px';
+                    element.style.borderRadius = '3px';
+                    element.style.transition = 'all 0.3s ease';
+                    
+                    // 添加悬停效果
+                    element.addEventListener('mouseenter', function() {
+                        this.style.backgroundColor = 'rgba(255, 154, 139, 0.2)';
+                        this.style.boxShadow = '0 0 0 2px rgba(255, 154, 139, 0.3)';
+                    });
+                    
+                    element.addEventListener('mouseleave', function() {
+                        if (!this.classList.contains('selected')) {
+                            this.style.backgroundColor = '';
+                            this.style.boxShadow = '';
+                        }
+                    });
+                }
+                
+                // 添加点击事件
+                element.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    
+                    // 清除之前的选择
+                    document.querySelectorAll('.commentable-text, .timeline-text p, .chat-bubble, .memory-item').forEach(el => {
+                        el.classList.remove('selected');
+                        // 恢复非span元素的样式
+                        if (el.tagName !== 'SPAN') {
+                            el.style.backgroundColor = '';
+                            el.style.boxShadow = '';
+                        }
+                    });
+                    
+                    // 标记当前选择
+                    this.classList.add('selected');
+                    // 为非span元素设置选中样式
+                    if (this.tagName !== 'SPAN') {
+                        this.style.backgroundColor = 'rgba(255, 154, 139, 0.4)';
+                        this.style.boxShadow = '0 0 0 2px var(--accent-color)';
+                    }
+                    
+                    // 保存选择信息
+                    selectedTextId = this.dataset.textId;
+                    selectedTextContent = this.textContent.trim();
+                    currentTimelineItem = this.closest('.timeline-item');
+                    
+                    // 显示评论弹窗
+                    showCommentModal();
+                });
+            });
+        }
+
+        // 显示评论弹窗
+        function showCommentModal() {
+            const modal = document.getElementById('commentModal');
+            const preview = document.getElementById('selectedTextPreview');
+            
+            preview.textContent = selectedTextContent;
+            modal.classList.add('active');
+            
+            // 重置表单状态
+            resetCommentForm();
+        }
+
+        // 关闭评论弹窗
+        function closeCommentModal() {
+            const modal = document.getElementById('commentModal');
+            modal.classList.remove('active');
+            
+            // 清除选择状态
+            document.querySelectorAll('.commentable-text, .timeline-text p, .chat-bubble, .memory-item').forEach(el => {
+                el.classList.remove('selected');
+                // 恢复非span元素的样式
+                if (el.tagName !== 'SPAN') {
+                    el.style.backgroundColor = '';
+                    el.style.boxShadow = '';
+                }
+            });
+            
+            selectedTextId = null;
+            selectedTextContent = null;
+            selectedAuthor = null;
+            currentTimelineItem = null;
+        }
+
+        // 初始化评论表单
+        function initCommentForm() {
+            const textarea = document.getElementById('commentTextarea');
+            
+            textarea.addEventListener('input', function() {
+                updateSubmitButtonState();
+            });
+        }
+
+        // 选择作者
+        function selectAuthor(author) {
+            // 清除之前的选择
+            document.querySelectorAll('.author-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            
+            // 标记当前选择
+            const selectedOption = document.querySelector(`[data-author="${author}"]`);
+            selectedOption.classList.add('selected');
+            
+            selectedAuthor = author;
+            updateSubmitButtonState();
+        }
+
+        // 重置评论表单
+        function resetCommentForm() {
+            document.getElementById('commentTextarea').value = '';
+            document.querySelectorAll('.author-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            selectedAuthor = null;
+            updateSubmitButtonState();
+        }
+
+        // 更新提交按钮状态
+        function updateSubmitButtonState() {
+            const submitBtn = document.getElementById('submitCommentBtn');
+            const textarea = document.getElementById('commentTextarea');
+            const hasContent = textarea.value.trim().length > 0;
+            const hasAuthor = selectedAuthor !== null;
+            
+            submitBtn.disabled = !(hasContent && hasAuthor);
+        }
+
+        // 提交评论
+        function submitComment() {
+            if (!selectedTextId || !selectedAuthor) return;
+            
+            const textarea = document.getElementById('commentTextarea');
+            const content = textarea.value.trim();
+            
+            if (!content) return;
+            
+            // 创建评论对象
+            const comment = {
+                id: Date.now(),
+                textId: selectedTextId,
+                author: selectedAuthor,
+                content: content,
+                timestamp: new Date().toLocaleString('zh-CN')
+            };
+            
+            // 保存到localStorage
+            saveComment(comment);
+            
+            // 在页面上显示评论
+            displayComment(comment);
+            
+            // 关闭弹窗
+            closeCommentModal();
+        }
+
+                // 保存评论到 JSONBin
+        async function saveComment(comment) {
+            try {
+                // 先保存到本地
+                let comments = JSON.parse(localStorage.getItem('timelineComments') || '[]');
+                comments.push(comment);
+                localStorage.setItem('timelineComments', JSON.stringify(comments));
+                
+                // 同步到云端
+                const response = await fetch(PROXY_JSONBIN_URL, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ comments: comments })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`保存失败: ${response.status}`);
+                }
+                
+                console.log('评论保存成功');
+                showStatus('评论已保存到云端！', true);
+                
+            } catch (error) {
+                console.error('保存到云端失败:', error);
+                showStatus('保存失败，请检查网络后重试', false);
+                // 从本地移除失败的评论
+                let comments = JSON.parse(localStorage.getItem('timelineComments') || '[]');
+                comments = comments.filter(c => c.id !== comment.id);
+                localStorage.setItem('timelineComments', JSON.stringify(comments));
+            }
+        }
+                // 显示状态提示
+        function showStatus(message, isSuccess = true) {
+            const indicator = document.getElementById('statusIndicator');
+            indicator.textContent = message;
+            indicator.className = `status-indicator ${isSuccess ? 'status-success' : 'status-error'} show`;
+            
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 3000);
+        }
+        // 显示评论气泡 - 修复版本
+        function displayComment(comment) {
+            const textElement = document.querySelector(`[data-text-id="${comment.textId}"]`);
+            if (!textElement) return;
+            
+            // 创建评论气泡元素
+            const commentBubble = document.createElement('div');
+            commentBubble.className = `side-comment ${comment.author}`;
+            commentBubble.dataset.commentId = comment.id; // 添加唯一标识
+            
+            // 确定气泡位置 - 修复版本
+            const timelineItem = textElement.closest('.timeline-item');
+            const timelineItems = document.querySelectorAll('.timeline-item');
+            const itemIndex = Array.from(timelineItems).indexOf(timelineItem);
+            const isEvenItem = itemIndex % 2 === 0; // 偶数项是左侧内容
+            
+            // 设置气泡位置类
+            commentBubble.classList.add(isEvenItem ? 'right' : 'left');
+            
+            // 设置气泡内容，添加删除按钮
+            const authorIcon = comment.author === 'cat' ? '🐱' : '🦊';
+            const authorName = comment.author === 'cat' ? '小猫' : '狐狸';
+            
+            commentBubble.innerHTML = `
+                <div class="comment-header">
+                    <span class="comment-author-icon">${authorIcon}</span>
+                    <span class="comment-author-name">${authorName}</span>
+                    <button class="delete-comment-btn" onclick="deleteComment('${comment.id}', this)">×</button>
+                </div>
+                <div class="comment-content">${comment.content}</div>
+                <div class="comment-time">${comment.timestamp}</div>
+            `;
+            
+            // 定位气泡
+            positionCommentBubble(commentBubble, textElement, timelineItem);
+            
+            // 添加到页面
+            document.body.appendChild(commentBubble);
+        }
+
+        // 定位评论气泡 - 修复水平位置不统一问题
+function positionCommentBubble(bubble, textElement, timelineItem) {
+    const rect = textElement.getBoundingClientRect();
+    const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
+    
+    // 获取时间线项的flex-direction
+    const computedStyle = window.getComputedStyle(timelineItem);
+    const flexDirection = computedStyle.flexDirection;
+    const isReversed = flexDirection === 'row-reverse';
+    
+    // 获取页面的容器（.container）元素
+    const container = document.querySelector('.container');
+    if (!container) {
+        console.error('找不到.container元素');
+        return;
+    }
+    
+    const containerRect = container.getBoundingClientRect();
+    const containerScrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+    
+    // 计算固定水平位置
+    if (isReversed) {
+        // 内容在右侧，评论放在左侧固定位置
+        // 将评论放在.container左侧边界内，但离左边缘有一定距离
+        const leftPosition = containerRect.left + containerScrollLeft + 50; // 50px 偏移
+        bubble.style.left = leftPosition + 'px';
+        bubble.classList.remove('right');
+        bubble.classList.add('left');
+    } else {
+        // 内容在左侧，评论放在右侧固定位置
+        // 将评论放在.container右侧边界内，但离右边缘有一定距离
+        const containerWidth = containerRect.width;
+        const rightPosition = containerRect.left + containerScrollLeft + containerWidth - 350; // 350px 是气泡宽度(300)+边距(50)
+        bubble.style.left = rightPosition + 'px';
+        bubble.classList.remove('left');
+        bubble.classList.add('right');
+    }
+    
+    // 垂直居中对齐（仍然基于文本位置）
+    bubble.style.top = (rect.top + scrollTop + rect.height / 2 - 60) + 'px';
+}
+
+        // 删除评论功能
+        function deleteComment(commentId, deleteBtn) {
+            if (!confirm('确定要删除这条评论吗？')) return;
+            
+            // 从localStorage中移除
+            let comments = JSON.parse(localStorage.getItem('timelineComments') || '[]');
+            comments = comments.filter(comment => comment.id.toString() !== commentId);
+            localStorage.setItem('timelineComments', JSON.stringify(comments));
+            
+            // 从页面中移除评论气泡
+            const commentBubble = deleteBtn.closest('.side-comment');
+            commentBubble.style.opacity = '0';
+            commentBubble.style.transform = 'scale(0.8)';
+            
+            setTimeout(() => {
+                if (commentBubble.parentNode) {
+                    commentBubble.parentNode.removeChild(commentBubble);
+                }
+            }, 300);
+        }
+
+                // 从 JSONBin 加载评论
+async function loadComments() {
+    try {
+        console.log('正在从云端加载评论...');
+        const response = await fetch(PROXY_JSONBIN_URL);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP错误: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        console.log('从云端收到的原始数据:', data);
+        console.log('data.record类型:', typeof data.record);
+        console.log('data.record内容:', data.record);
+        
+        // 处理数据格式
+        let comments = [];
+        if (Array.isArray(data.record)) {
+            comments = data.record;
+            console.log('数据是数组格式');
+        } else if (data.record && data.record.comments && Array.isArray(data.record.comments)) {
+            comments = data.record.comments;
+            console.log('数据是{comments: [...]}格式');
+        } else {
+            comments = data.record || [];
+            console.log('数据是其他格式');
+        }
+        
+        console.log('处理后的评论数组:', comments);
+        console.log('评论数量:', comments.length);
+        
+        // 过滤掉系统消息并渲染
+        const filteredComments = comments.filter(comment => {
+            console.log('检查评论:', comment);
+            const isNotSystem = comment.author !== 'system';
+            console.log('是否非系统消息:', isNotSystem);
+            return isNotSystem;
+        });
+        
+        console.log('过滤后的评论:', filteredComments);
+        
+        filteredComments.forEach((comment, index) => {
+            console.log(`处理第${index + 1}条评论:`, comment);
+            const textElement = document.querySelector(`[data-text-id="${comment.textId}"]`);
+            console.log(`查找textId=${comment.textId}的元素:`, textElement);
+            
+            if (textElement) {
+                currentTimelineItem = textElement.closest('.timeline-item');
+                displayComment(comment);
+                console.log('成功显示评论');
+            } else {
+                console.log('未找到对应的文字元素');
+            }
+        });
+        
+        // 本地备份
+        localStorage.setItem('timelineComments_backup', JSON.stringify(filteredComments));
+        console.log(`成功加载 ${filteredComments.length} 条评论`);
+        
+    } catch (error) {
+        console.error('从云端加载评论失败:', error);
+        // 降级到本地存储
+        const localComments = JSON.parse(localStorage.getItem('timelineComments') || '[]');
+        localComments.forEach(comment => {
+            const textElement = document.querySelector(`[data-text-id="${comment.textId}"]`);
+            if (textElement) {
+                currentTimelineItem = textElement.closest('.timeline-item');
+                displayComment(comment);
+            }
+        });
+    }
+}
+    // ==== 完整版时间轴编辑功能 ====
+
+// 全局变量
+let isEditing = false;
+let editingItemId = null;
+
+// 添加/管理多条目编辑支持
+function createEntryRow(item, isFirst) {
+    const row = document.createElement('div');
+    row.className = 'entry-row';
+    row.style.border = '1px solid #eee';
+    row.style.padding = '12px';
+    row.style.borderRadius = '8px';
+    row.style.marginBottom = '12px';
+
+    const dateVal = item?.date || '';
+    const titleVal = item?.title || '';
+    // item may have blocks; if provided and isFirst, take first block content
+    const contentVal = (item?.content && !item.blocks) ? item.content.replace(/<[^>]*>/g, '') : (item?.blocks?.[0]?.content || item?.content || '');
+    const typesVal = Array.isArray(item?.types) ? item.types : (item?.type ? [item.type] : (item?.blocks?.[0]?.types || ['normal']));
+
+    let html = '';
+    if (isFirst) {
+        html += `
+        <div class="form-group">
+            <label>日期：</label>
+            <input type="text" class="entry-date" placeholder="例如：2026年3月" value="${escapeHtml(dateVal)}">
+        </div>
+        <div class="form-group">
+            <label>标题：</label>
+            <input type="text" class="entry-title" placeholder="事件标题" value="${escapeHtml(titleVal)}">
+        </div>
+        `;
+    }
+
+    html += `
+        <div class="form-group">
+            <label>内容：</label>
+            <textarea class="entry-content" placeholder="详细描述..." rows="3">${escapeHtml(contentVal)}</textarea>
+        </div>
+        <div class="form-group">
+            <label>类型：</label>
+            <select class="entry-type-select">
+                <option value="memory">记忆片段</option>
+                <option value="chat">对话记录</option>
+                <option value="highlight">重点内容</option>
+                <option value="normal">普通叙述</option>
+            </select>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+            <button type="button" class="btn-secondary" onclick="removeEntryRow(this)">移除</button>
+        </div>
+    `;
+
+    row.innerHTML = html;
+
+    // 设置类型选择
+    const typeSelect = row.querySelector('.entry-type-select');
+    if (typeSelect) {
+        const allowedTypes = ['memory','chat','highlight','normal'];
+        const candidate = (Array.isArray(typesVal) && typesVal.length>0) ? typesVal[0] : (typesVal || 'normal');
+        const pick = allowedTypes.includes(candidate) ? candidate : 'normal';
+        typeSelect.value = pick;
+    }
+
+    // 添加聊天左右选择（每行独立）
+    const sideName = 'entry-side-' + Math.floor(Math.random() * 1000000);
+    const sideWrap = document.createElement('div');
+    sideWrap.style.display = 'flex';
+    sideWrap.style.gap = '8px';
+    sideWrap.style.alignItems = 'center';
+    sideWrap.style.marginTop = '8px';
+    sideWrap.innerHTML = `
+        <label style="font-weight:600; margin-right:6px;">对话方向：</label>
+        <label><input type="radio" name="${sideName}" value="left" class="entry-side" checked> 左侧</label>
+        <label><input type="radio" name="${sideName}" value="right" class="entry-side"> 右侧</label>
+    `;
+    // 默认仅当 chat 被选中时可用
+    row.appendChild(sideWrap);
+
+    const updateSideState = () => {
+        // 如果存在 select，则根据 select 判断；否则回退到旧的 checkbox 形式（兼容）
+        let hasChat = false;
+        if (typeSelect) {
+            hasChat = (typeSelect.value === 'chat');
+        } else {
+            const cbsFallback = row.querySelectorAll('.entry-type');
+            hasChat = Array.from(cbsFallback).some(cb => cb.checked && cb.value === 'chat');
+        }
+        const radios = row.querySelectorAll('.entry-side');
+        radios.forEach(r => r.disabled = !hasChat);
+        if (!hasChat) {
+            const left = row.querySelector(`input[name="${sideName}"][value="left"]`);
+            if (left) left.checked = true;
+        }
+    };
+
+    // 绑定类型变化事件（select）
+    if (typeSelect) typeSelect.addEventListener('change', updateSideState);
+    // 初始化状态
+    setTimeout(updateSideState, 0);
+
+    return row;
+}
+
+function addEntryRow(item, isFirstParam) {
+    const container = document.getElementById('entriesContainer');
+    if (!container) return;
+    const isFirst = (typeof isFirstParam === 'boolean') ? isFirstParam : (container.children.length === 0);
+    const row = createEntryRow(item, isFirst);
+    container.appendChild(row);
+}
+
+function removeEntryRow(btn) {
+    const row = btn.closest('.entry-row');
+    if (row) row.remove();
+}
+
+function escapeHtml(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// 切换编辑器显示状态
+function toggleEditor() {
+    const panel = document.querySelector('.editor-panel');
+    const toggleBtn = document.querySelector('.editor-toggle');
+    
+    if (panel.classList.contains('active')) {
+        panel.classList.remove('active');
+        toggleBtn.innerHTML = '<i class="fas fa-plus-circle"></i><span>添加新节点</span>';
+    } else {
+        panel.classList.add('active');
+        toggleBtn.innerHTML = '<i class="fas fa-times"></i><span>关闭编辑器</span>';
+        resetEditForm();
+    }
+}
+
+// 重置编辑表单
+function resetEditForm() {
+    // 清空多条目容器并添加一个空白首条目
+    const container = document.getElementById('entriesContainer');
+    if (container) {
+        container.innerHTML = '';
+        addEntryRow();
+    }
+    isEditing = false;
+    editingItemId = null;
+    
+    // 更新按钮文本
+    const saveBtn = document.querySelector('.btn-primary');
+    saveBtn.textContent = '保存';
+    
+    // 隐藏删除按钮
+    const deleteBtn = document.querySelector('.btn-delete');
+    if (deleteBtn) deleteBtn.style.display = 'none';
+}
+
+// 取消编辑
+function cancelEdit() {
+    toggleEditor();
+}
+
+// 编辑现有时间轴节点
+function editTimelineItem(itemId) {
+    const item = document.querySelector(`[data-item-id="${itemId}"]`);
+    if (!item) return;
+    
+    // 获取数据
+    const date = item.querySelector('.timeline-date').textContent.trim().replace('\n', '').replace(/\s+/g, ' ');
+    const title = item.querySelector('.timeline-title').textContent;
+    const content = item.querySelector('.timeline-text').innerHTML;
+    
+    // 准备并填充条目编辑行（支持多个块：第一个含日期/标题，后续仅为内容块）
+    // 读取 item 数据：优先尝试 dataset.blocks 或 dataset.types，再从 DOM 推断
+    let blocks = [];
+    try {
+        if (item.dataset.blocks) blocks = JSON.parse(item.dataset.blocks);
+    } catch(e) { blocks = []; }
+
+    if (blocks.length === 0) {
+        // 从 DOM 推断：若存在多块内容，则按顺序收集
+        const inferred = [];
+        const chat = item.querySelectorAll('.chat-bubble');
+        chat.forEach(cb => inferred.push({ content: cb.textContent.trim(), types: ['chat'] }));
+        const memories = item.querySelectorAll('.memory-item');
+        memories.forEach(m => inferred.push({ content: m.textContent.trim(), types: ['memory'] }));
+        const highlights = item.querySelectorAll('.highlight-box');
+        highlights.forEach(h => inferred.push({ content: h.textContent.trim(), types: ['highlight'] }));
+        if (inferred.length > 0) blocks = inferred;
+    }
+
+    const container = document.getElementById('entriesContainer');
+    if (container) {
+        container.innerHTML = '';
+        // 首行使用 item 的 date/title 与第一个 block
+        addEntryRow({ date: date.replace('\u{f073}', '').trim(), title: title, content: blocks[0]?.content || content, types: blocks[0]?.types || undefined }, true);
+        // 其余 block 行仅填充内容/types
+        for (let i = 1; i < blocks.length; i++) {
+            addEntryRow({ content: blocks[i].content, types: blocks[i].types }, false);
+        }
+    }
+    
+    // 设置编辑状态
+    isEditing = true;
+    editingItemId = itemId;
+    
+    // 更新按钮文本
+    const saveBtn = document.querySelector('.btn-primary');
+    saveBtn.textContent = '更新';
+    
+    // 显示删除按钮
+    const deleteBtn = document.querySelector('.btn-delete');
+    if (deleteBtn) deleteBtn.style.display = 'inline-block';
+    
+    // 显示编辑器
+    const panel = document.querySelector('.editor-panel');
+    if (!panel.classList.contains('active')) {
+        toggleEditor();
+    }
+}
+
+// 删除时间轴节点
+async function deleteTimelineItem() {
+    if (!editingItemId || !confirm('确定要删除这个时间轴节点吗？此操作不可撤销。')) {
+        return;
+    }
+    
+    try {
+        // 从页面中移除
+        const item = document.querySelector(`[data-item-id="${editingItemId}"]`);
+        if (item) {
+            item.style.opacity = '0';
+            item.style.transform = 'translateY(-20px)';
+            setTimeout(() => {
+                item.remove();
+            }, 300);
+        }
+        
+        // 从云端删除
+        const response = await fetch(PROXY_JSONBIN_URL);
+
+        let existingData = { timeline: [] };
+        if (response.ok) {
+            const data = await response.json();
+            existingData = data.record || { timeline: [] };
+        }
+
+        // 过滤掉被删除的项目
+        existingData.timeline = existingData.timeline.filter(item => 
+            `item-${item.id}` !== editingItemId
+        );
+
+        // 保存回云端
+        await fetch(PROXY_JSONBIN_URL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(existingData)
+        });
+        
+        showStatus('时间轴节点已删除！', true);
+        cancelEdit();
+        
+    } catch (error) {
+        console.error('删除失败:', error);
+        showStatus('删除失败，请检查网络连接', false);
+    }
+}
+
+// 保存新的或更新的时间轴节点
+async function saveNewTimelineItem() {
+    // 收集界面上的所有条目
+    const rows = Array.from(document.querySelectorAll('.entry-row'));
+    if (rows.length === 0) {
+        alert('请至少添加一个条目');
+        return;
+    }
+
+    const entries = rows.map(r => {
+        const date = (r.querySelector('.entry-date')?.value || '').trim();
+        const title = (r.querySelector('.entry-title')?.value || '').trim();
+        const content = (r.querySelector('.entry-content')?.value || '').trim();
+        const type = (r.querySelector('.entry-type-select')?.value) || 'normal';
+        const types = [type];
+        const sideInput = r.querySelector('.entry-side:checked');
+        const side = sideInput ? sideInput.value : 'left';
+        return { date, title, content, types, type, side };
+    });
+
+    // 简单验证：确保每条都有内容和标题（日期可选）
+    // 验证：仅要求首条包含标题（date 可选），其余条目只需内容
+    for (let i = 0; i < entries.length; i++) {
+        const e = entries[i];
+        if (i === 0) {
+            if (!e.title || !e.content) {
+                alert('首条必须包含标题和内容');
+                return;
+            }
+        } else {
+            if (!e.content) {
+                alert('后续条目必须填写内容或移除空条目');
+                return;
+            }
+        }
+    }
+
+    try {
+        // 获取现有数据
+        const response = await fetch(PROXY_JSONBIN_URL);
+
+        let existingData = { timeline: [] };
+        if (response.ok) {
+            const data = await response.json();
+            existingData = data.record || { timeline: [] };
+        }
+
+        // 确保timeline数组存在
+        if (!existingData.timeline) {
+            existingData.timeline = [];
+        }
+
+        if (isEditing && editingItemId) {
+            // 更新现有节点：使用首条的 date/title，并把所有条目作为 blocks 写入
+            const itemIndex = existingData.timeline.findIndex(item => `item-${item.id}` === editingItemId);
+            if (itemIndex !== -1) {
+                const first = entries[0];
+                const blocks = entries.map(e => ({ content: e.content, types: e.types, side: e.side || 'left' }));
+                existingData.timeline[itemIndex] = {
+                    ...existingData.timeline[itemIndex],
+                    date: first.date,
+                    title: first.title,
+                    blocks: blocks,
+                    // 向后兼容保留 types/type 为首块
+                    types: blocks[0].types,
+                    type: blocks[0].types[0],
+                    timestamp: new Date().toISOString()
+                };
+                updateTimelineItem(existingData.timeline[itemIndex]);
+                showStatus('时间轴节点已更新！', true);
+            }
+        } else {
+            // 创建一个新的节点，包含多个块
+            const first = entries[0];
+            const blocks = entries.map(e => ({ content: e.content, types: e.types, side: e.side || 'left' }));
+            const newItem = {
+                id: Date.now(),
+                date: first.date,
+                title: first.title,
+                blocks: blocks,
+                types: blocks[0].types,
+                type: blocks[0].types[0],
+                timestamp: new Date().toISOString()
+            };
+            existingData.timeline.push(newItem);
+            renderNewTimelineItem(newItem);
+            showStatus('新节点已添加并保存到云端！', true);
+        }
+
+        // 保存回云端
+        const saveResponse = await fetch(PROXY_JSONBIN_URL, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(existingData)
+        });
+
+        if (!saveResponse.ok) {
+            throw new Error('保存失败');
+        }
+        
+        // 关闭编辑器并清空表单
+        cancelEdit();
+        
+    } catch (error) {
+        console.error('保存失败:', error);
+        showStatus('保存失败，请检查网络连接', false);
+    }
+}
+
+// 渲染新的时间轴节点到页面
+function renderNewTimelineItem(item) {
+    const timeline = document.querySelector('.timeline');
+    
+    // 创建新的时间轴项目元素
+    const newItemElement = createTimelineItemElement(item);
+    
+    // 添加编辑按钮
+    const editBtn = document.createElement('button');
+    editBtn.className = 'edit-item-btn';
+    editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+    editBtn.onclick = () => editTimelineItem(`item-${item.id}`);
+    
+    const timelineContent = newItemElement.querySelector('.timeline-content');
+    timelineContent.style.position = 'relative';
+    timelineContent.appendChild(editBtn);
+    
+    // 添加到时间轴末尾
+    timeline.appendChild(newItemElement);
+
+    // 添加动画效果
+    setTimeout(() => {
+        newItemElement.style.opacity = '1';
+        newItemElement.style.transform = 'translateY(0)';
+    }, 100);
+}
+
+// 更新现有的时间轴节点
+function updateTimelineItem(item) {
+    const existingItem = document.querySelector(`[data-item-id="item-${item.id}"]`);
+    if (existingItem) {
+        const newItemElement = createTimelineItemElement(item);
+        existingItem.parentNode.replaceChild(newItemElement, existingItem);
+        
+        // 重新添加编辑按钮
+        const editBtn = document.createElement('button');
+        editBtn.className = 'edit-item-btn';
+        editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+        editBtn.onclick = () => editTimelineItem(`item-${item.id}`);
+        
+        const timelineContent = newItemElement.querySelector('.timeline-content');
+        timelineContent.style.position = 'relative';
+        timelineContent.appendChild(editBtn);
+    }
+}
+
+// 创建时间轴项目元素的通用函数
+function createTimelineItemElement(item) {
+    const newItemElement = document.createElement('div');
+    newItemElement.className = 'timeline-item';
+    newItemElement.style.animationDelay = '0.1s';
+    newItemElement.dataset.itemId = `item-${item.id}`;
+
+    // 支持 blocks（每个 block 有 content + types），向后兼容 item.content/item.types
+    const blocks = Array.isArray(item.blocks) ? item.blocks : ((item.content || item.types) ? [{ content: item.content || '', types: item.types || (item.type ? [item.type] : ['normal']) }] : [{ content: '', types: ['normal'] }]);
+
+    // 仅保留允许类型列表用于每个块的渲染；不再显示整体类型标签
+    const allowedTypes = ['memory','chat','highlight'];
+
+    // 根据 blocks 渲染多个内容块
+    const blocksHtml = blocks.map(b => {
+        const rawTypes = Array.isArray(b.types) ? b.types : (b.type ? [b.type] : []);
+        const types = rawTypes.filter(t => allowedTypes.includes(t));
+        const sideClass = (b.side === 'right') ? 'chat-right' : 'chat-left';
+        if (types.includes('chat')) {
+            return `<div class="chat-bubble ${sideClass}">${b.content}</div>`;
+        } else if (types.includes('memory')) {
+            return `<div class="memory-item"><div class="memory-icon"><i class="fas fa-star"></i></div><div><strong>${item.title}</strong><br>${b.content}</div></div>`;
+        } else if (types.includes('highlight')) {
+            return `<div class="highlight-box">${b.content}</div>`;
+        } else {
+            return `<p>${b.content}</p>`;
+        }
+    }).join('\n');
+
+    newItemElement.innerHTML = `
+        <div class="timeline-dot"></div>
+        <div class="timeline-content">
+            <div class="timeline-date">
+                <i class="fas fa-calendar-alt"></i>
+                ${item.date}
+            </div>
+            <h3 class="timeline-title">${item.title}</h3>
+            
+            <div class="timeline-text">
+                ${blocksHtml}
+            </div>
+        </div>
+    `;
+
+    // 保存 types 到 DOM 以便编辑时读取（使用首块的 types）
+    try { newItemElement.dataset.types = JSON.stringify(blocks[0]?.types || item.types || item.type || []); } catch(e) { /* ignore */ }
+    try { if (item.blocks) newItemElement.dataset.blocks = JSON.stringify(item.blocks); } catch(e) { }
+
+    return newItemElement;
+}
+
+// 页面加载时检查并加载已有的自定义节点
+document.addEventListener('DOMContentLoaded', function() {
+    loadCustomTimelineItems();
+    
+    // 为现有时间轴节点添加编辑按钮
+    setTimeout(() => {
+        addEditButtonsToExistingItems();
+    }, 500);
+});
+
+// 为现有时间轴节点添加编辑按钮
+function addEditButtonsToExistingItems() {
+    const timelineItems = document.querySelectorAll('.timeline-item');
+    timelineItems.forEach(item => {
+        const itemId = item.dataset.itemId;
+        if (itemId && !item.querySelector('.edit-item-btn')) {
+            const editBtn = document.createElement('button');
+            editBtn.className = 'edit-item-btn';
+            editBtn.innerHTML = '<i class="fas fa-edit"></i>';
+            editBtn.onclick = () => editTimelineItem(itemId);
+            
+            const timelineContent = item.querySelector('.timeline-content');
+            timelineContent.style.position = 'relative';
+            timelineContent.appendChild(editBtn);
+        }
+    });
+}
+
+// 加载自定义时间轴节点
+async function loadCustomTimelineItems() {
+    try {
+        const response = await fetch(PROXY_JSONBIN_URL);
+
+        if (response.ok) {
+            const data = await response.json();
+            let customItems = data.record?.timeline || [];
+            // 向后兼容：如果旧数据使用了单个 `type` 字段，转换为 `types` 数组
+            customItems = customItems.map(it => {
+                if (it && !Array.isArray(it.types) && it.type) {
+                    return { ...it, types: [it.type] };
+                }
+                return it;
+            });
+            
+            // 渲染所有自定义节点
+            customItems.forEach(item => renderNewTimelineItem(item));
+        }
+    } catch (error) {
+        console.log('加载自定义时间轴节点失败:', error);
+    }
+}
+
+// ==== 时间轴编辑功能结束 ====
+        </script>
+</body>
+</html>

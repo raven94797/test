@@ -1,6 +1,4 @@
-// Netlify Serverless Function
-const fetch = require('node-fetch');
-
+// Netlify Serverless Function (使用全局 fetch，避免额外依赖)
 exports.handler = async (event, context) => {
   // 1. 获取环境变量中的API Key
   const JSONBIN_MASTER_KEY = process.env.JSONBIN_MASTER_KEY;
@@ -17,6 +15,17 @@ exports.handler = async (event, context) => {
   // 3. 处理预检请求
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers, body: '' };
+  }
+
+  if (!JSONBIN_MASTER_KEY) {
+    return {
+      statusCode: 500,
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ error: 'Missing JSONBIN_MASTER_KEY in environment' })
+    };
   }
 
   try {
@@ -55,12 +64,18 @@ exports.handler = async (event, context) => {
       };
     }
 
-    const data = await response.json();
-    
+    // 尝试解析 JSON，否则返回文本
+    let bodyContent;
+    try {
+      bodyContent = await response.json();
+    } catch (e) {
+      bodyContent = await response.text();
+    }
+
     return {
       statusCode: response.status,
       headers,
-      body: JSON.stringify(data)
+      body: typeof bodyContent === 'string' ? JSON.stringify({ message: bodyContent }) : JSON.stringify(bodyContent)
     };
     
   } catch (error) {

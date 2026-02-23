@@ -1,0 +1,8 @@
+[build]
+  publish = "."
+  functions = "netlify/functions"
+
+[[redirects]]
+  from = "/api/jsonbin/*"
+  to = "/.netlify/functions/jsonbin-proxy"
+  status = 200

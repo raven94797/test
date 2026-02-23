@@ -13,19 +13,10 @@ JSONBIN_MASTER_KEY=你的_master_key_here
 
 ```bash
 npm install
-npm start
-```
+````markdown
+（已弃用）本项目已切换为 Netlify-only 部署，原本的本地代理说明已移除。
 
-3. 打开浏览器访问：
+若需要保留本地代理用于调试，可参考旧版 `server.js` 实现并在本地设置 `.env`。不要把真实的 `JSONBIN_MASTER_KEY` 提交到仓库。
 
-http://localhost:3000/index.html
+````
 
-说明：
-- 服务器提供两个接口：
-  - `GET /api/jsonbin`：从 JSONBin 拉取记录并返回（原样转发 JSONBin 响应）。
-  - `PUT /api/jsonbin`：将客户端传入的 JSON 体 PUT 回 JSONBin（使用 Master Key）。
-- 客户端代码已修改为调用这两个接口，客户端不再包含 Master Key。
-
-安全建议：
-- 仅将 Master Key 存放在服务器环境变量或受保护的配置中。
-- 若需要对写入做权限控制，可在代理层添加认证（例如简单的 API token）。

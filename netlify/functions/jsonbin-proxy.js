@@ -1,53 +1,62 @@
-// Netlify Serverless Function (使用全局 fetch，避免额外依赖)
+// netlify/functions/jsonbin-proxy.js
+// 稳定版代理实现 —— 使用全局 fetch（Netlify 使用 Node 18+），并带完整 CORS 与错误处理
 exports.handler = async (event, context) => {
-  // 1. 获取环境变量中的API Key
-  const JSONBIN_MASTER_KEY = process.env.JSONBIN_MASTER_KEY;
-  const JSONBIN_BIN_ID = process.env.JSONBIN_BIN_ID || '6995d9b2ae596e708f34a423';
-  
-  // 2. 设置CORS头
+  // 设置CORS头部
   const headers = {
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Headers': 'Content-Type',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Methods': 'GET, PUT, OPTIONS',
     'Content-Type': 'application/json'
   };
 
-  // 3. 处理预检请求
+  // 处理预检请求
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 200, headers, body: '' };
   }
 
-  if (!JSONBIN_MASTER_KEY) {
-    return {
-      statusCode: 500,
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ error: 'Missing JSONBIN_MASTER_KEY in environment' })
-    };
-  }
-
   try {
+    const JSONBIN_BIN_ID = process.env.JSONBIN_BIN_ID || '6995d9b2ae596e708f34a423';
+    const JSONBIN_MASTER_KEY = process.env.JSONBIN_MASTER_KEY;
+
+    if (!JSONBIN_MASTER_KEY) {
+      throw new Error('JSONBIN_MASTER_KEY 环境变量未设置');
+    }
+
     const jsonbinUrl = `https://api.jsonbin.io/v3/b/${JSONBIN_BIN_ID}`;
-    
-    // 4. 根据请求方法转发到JSONBin
-    let response;
+
+    // GET 请求 - 读取数据
     if (event.httpMethod === 'GET') {
-      response = await fetch(jsonbinUrl, {
-        headers: { 'X-Master-Key': JSONBIN_MASTER_KEY }
+      const response = await fetch(jsonbinUrl, {
+        headers: {
+          'X-Master-Key': JSONBIN_MASTER_KEY,
+          'X-Bin-Meta': 'false'
+        }
       });
-    } 
-    else if (event.httpMethod === 'PUT') {
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`读取失败: ${response.status} - ${errText}`);
+      }
+
+      const data = await response.json();
+      return {
+        statusCode: 200,
+        headers,
+        body: JSON.stringify(data)
+      };
+    }
+
+    // PUT 请求 - 保存数据
+    if (event.httpMethod === 'PUT') {
       const requestBody = JSON.parse(event.body || '{}');
-      
+
       // 确保数据结构完整
       const dataToSave = {
         comments: Array.isArray(requestBody.comments) ? requestBody.comments : [],
         timeline: Array.isArray(requestBody.timeline) ? requestBody.timeline : []
       };
-      
-      response = await fetch(jsonbinUrl, {
+
+      const response = await fetch(jsonbinUrl, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
@@ -55,37 +64,37 @@ exports.handler = async (event, context) => {
         },
         body: JSON.stringify(dataToSave)
       });
-    } 
-    else {
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`保存失败: ${response.status} - ${errorText}`);
+      }
+
+      const result = await response.json();
       return {
-        statusCode: 405,
+        statusCode: 200,
         headers,
-        body: JSON.stringify({ error: 'Method not allowed' })
+        body: JSON.stringify(result)
       };
     }
 
-    // 尝试解析 JSON，否则返回文本
-    let bodyContent;
-    try {
-      bodyContent = await response.json();
-    } catch (e) {
-      bodyContent = await response.text();
-    }
-
+    // 不支持的请求方法
     return {
-      statusCode: response.status,
+      statusCode: 405,
       headers,
-      body: typeof bodyContent === 'string' ? JSON.stringify({ message: bodyContent }) : JSON.stringify(bodyContent)
+      body: JSON.stringify({ error: '方法不允许' })
     };
-    
+
   } catch (error) {
+    console.error('代理函数错误:', error);
     return {
       statusCode: 500,
       headers,
       body: JSON.stringify({ 
-        error: 'Proxy error', 
-        message: error.message 
+        error: '内部服务器错误',
+        message: error.message
       })
     };
   }
+};
 };

@@ -1,19 +1,15 @@
 [build]
   publish = "."
   functions = "netlify/functions"
-[[redirects]]
-  from = "/api-test"
-  to = "/.netlify/functions/jsonbin-proxy"
-  status = 200
 
-# API 重定向规则 - 必须放在前面
+# 1. 首先，精确匹配 API 路径
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
-  force = true  # 强制应用此规则
+  force = true  # 确保强制生效
 
-# 单页应用回退规则 - 必须放在最后
+# 2. 然后，通用回退规则（必须放在最后）
 [[redirects]]
   from = "/*"
   to = "/index.html"

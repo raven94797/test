@@ -2437,16 +2437,26 @@ document.addEventListener('DOMContentLoaded', function() {
                 comments.push(comment);
                 localStorage.setItem('timelineComments', JSON.stringify(comments));
                 
-                // 同步到云端
-                const response = await fetchJsonBin({
-                    method: 'PUT',
-                    body: JSON.stringify({ comments: comments })
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`保存失败: ${response.status}`);
+                // 同步到云端：先获取完整数据，更新 comments 字段后再保存，避免覆盖 timeline 等其它字段
+                const getResponse = await fetchJsonBin();
+                let existingData = { comments: [], timeline: [] };
+                if (getResponse.ok) {
+                    const data = await getResponse.json();
+                    existingData = data.record || existingData;
                 }
-                
+
+                // 更新评论并保存完整对象
+                existingData.comments = comments;
+
+                const putResponse = await fetchJsonBin({
+                    method: 'PUT',
+                    body: JSON.stringify(existingData)
+                });
+
+                if (!putResponse.ok) {
+                    throw new Error(`保存失败: ${putResponse.status}`);
+                }
+
                 console.log('评论保存成功');
                 showStatus('评论已保存到云端！', true);
                 

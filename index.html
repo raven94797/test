@@ -2090,6 +2090,9 @@
                     };
 
                     try {
+                        const method = (options && options.method) || 'GET';
+                        if (window.debugLog) window.debugLog(`→ ${method} ${JSONBIN_API_URL}`);
+
                         const resp = await fetch(JSONBIN_API_URL, {
                             ...options,
                             headers: {
@@ -2103,14 +2106,19 @@
                             try {
                                 const text = await resp.clone().text();
                                 console.error('JSONBin 请求失败', resp.status, text);
+                                if (window.debugLog) window.debugLog(`✖ ${resp.status} ${text}`);
                             } catch (e) {
                                 console.error('读取错误响应体失败', e);
+                                if (window.debugLog) window.debugLog(`✖ ${resp.status} (无法读取响应体)`);
                             }
+                        } else {
+                            if (window.debugLog) window.debugLog(`✓ ${resp.status} ${method}`);
                         }
 
                         return resp;
                     } catch (err) {
                         console.error('fetchJsonBin 网络或 CORS 错误:', err);
+                        if (window.debugLog) window.debugLog(`⚠ 网络或 CORS 错误: ${err.message || err}`);
                         throw err;
                     }
                 }
@@ -2137,6 +2145,65 @@ document.addEventListener('DOMContentLoaded', function() {
         item.style.animationPlayState = 'paused';
         observer.observe(item);
     });
+
+    // 创建调试面板（可切换）用于显示网络请求与错误，便于排查保存失败问题
+    (function createDebugPanel(){
+        const btn = document.createElement('button');
+        btn.id = 'debugToggleBtn';
+        btn.textContent = '调试日志';
+        Object.assign(btn.style, {
+            position: 'fixed',
+            right: '20px',
+            bottom: '20px',
+            zIndex: 2000,
+            padding: '8px 12px',
+            borderRadius: '8px',
+            background: 'rgba(0,0,0,0.7)',
+            color: 'white',
+            border: 'none',
+            cursor: 'pointer'
+        });
+        document.body.appendChild(btn);
+
+        const panel = document.createElement('div');
+        panel.id = 'debugLogPanel';
+        Object.assign(panel.style, {
+            position: 'fixed',
+            right: '20px',
+            bottom: '64px',
+            width: '420px',
+            maxHeight: '50vh',
+            overflow: 'auto',
+            zIndex: 2000,
+            background: 'rgba(0,0,0,0.85)',
+            color: '#fff',
+            padding: '10px',
+            borderRadius: '8px',
+            fontSize: '12px',
+            display: 'none',
+            whiteSpace: 'pre-wrap'
+        });
+        document.body.appendChild(panel);
+
+        btn.addEventListener('click', () => {
+            panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+        });
+
+        // 全局 debugLog 函数
+        window.debugLog = function(msg) {
+            try {
+                const time = new Date().toLocaleTimeString();
+                const line = document.createElement('div');
+                line.textContent = `[${time}] ${msg}`;
+                panel.appendChild(line);
+                panel.scrollTop = panel.scrollHeight;
+                // 也保留到 console
+                console.log('[DEBUG]', msg);
+            } catch (e) {
+                console.log('debugLog error', e);
+            }
+        };
+    })();
 
             // 2. 启动爱心雨背景效果
             startHeartRain();

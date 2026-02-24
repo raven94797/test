@@ -2486,6 +2486,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 localStorage.setItem('timelineComments', JSON.stringify(comments));
             }
         }
+        
+        // 保存完整记录到 JSONBin 的通用函数（用于更新 comments 或 timeline）
+        async function saveFullRecord(record) {
+            try {
+                const putResponse = await fetchJsonBin({
+                    method: 'PUT',
+                    body: JSON.stringify(record)
+                });
+
+                if (!putResponse.ok) {
+                    throw new Error(`保存失败: ${putResponse.status}`);
+                }
+
+                return putResponse;
+            } catch (err) {
+                console.error('保存完整记录失败:', err);
+                throw err;
+            }
+        }
                 // 显示状态提示
         function showStatus(message, isSuccess = true) {
             const indicator = document.getElementById('statusIndicator');
@@ -2925,10 +2944,7 @@ function editTimelineItem(itemId) {
         );
 
         // 保存回云端
-        await fetchJsonBin({
-            method: 'PUT',
-            body: JSON.stringify(existingData)
-        });
+        await saveFullRecord(existingData);
         
         showStatus('时间轴节点已删除！', true);
         cancelEdit();
@@ -3029,14 +3045,7 @@ function editTimelineItem(itemId) {
         }
 
         // 保存回云端
-        const saveResponse = await fetchJsonBin({
-            method: 'PUT',
-            body: JSON.stringify(existingData)
-        });
-
-        if (!saveResponse.ok) {
-            throw new Error('保存失败');
-        }
+        await saveFullRecord(existingData);
         
         // 关闭编辑器并清空表单
         cancelEdit();

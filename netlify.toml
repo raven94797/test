@@ -1,6 +1,10 @@
 [build]
   publish = "."
   functions = "netlify/functions"
+[[redirects]]
+  from = "/api-test"
+  to = "/.netlify/functions/jsonbin-proxy"
+  status = 200
 
 # API 重定向规则 - 必须放在前面
 [[redirects]]

@@ -1542,32 +1542,8 @@
                 comments.push(comment);
                 localStorage.setItem('timelineComments', JSON.stringify(comments));
                 
-                // 同步到云端
-                const response = await fetch(JSONBIN_API_URL, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': JSONBIN_MASTER_KEY
-                    },
-                    body: JSON.stringify({ comments: comments })
-                });
-                
-                if (!response.ok) {
-                    throw new Error(`保存失败: ${response.status}`);
-                }
-                
-                console.log('评论保存成功');
-                showStatus('评论已保存到云端！', true);
-                
-            } catch (error) {
-                console.error('保存到云端失败:', error);
-                showStatus('保存失败，请检查网络后重试', false);
-                // 从本地移除失败的评论
-                let comments = JSON.parse(localStorage.getItem('timelineComments') || '[]');
-                comments = comments.filter(c => c.id !== comment.id);
-                localStorage.setItem('timelineComments', JSON.stringify(comments));
-            }
-        }
+                // 已移除：旧的直接 PUT 实现（使用文件底部的合并式 saveComment）
+                // 新的实现会先 GET 完整记录、合并 comments 后 PUT，以避免覆盖 timeline
                 // 显示状态提示
         function showStatus(message, isSuccess = true) {
             const indicator = document.getElementById('statusIndicator');

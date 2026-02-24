@@ -2,11 +2,14 @@
   publish = "."
   functions = "netlify/functions"
 
+# API 重定向必须放在 SPA 规则之前
 [[redirects]]
   from = "/api/*"
   to = "/.netlify/functions/:splat"
   status = 200
+  force = true
 
+# SPA 回退规则（必须放在最后）
 [[redirects]]
   from = "/*"
   to = "/index.html"

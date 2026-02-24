@@ -11,6 +11,6 @@
 
 # 单页应用回退规则 - 必须放在最后
 [[redirects]]
-  from = "/test-redirect"
-  to = "https://www.baidu.com"
-  status = 301
+  from = "/*"
+  to = "/index.html"
+  status = 200

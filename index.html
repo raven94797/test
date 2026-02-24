@@ -2089,13 +2089,30 @@
                         'X-Master-Key': JSONBIN_MASTER_KEY
                     };
 
-                    return fetch(JSONBIN_API_URL, {
-                        ...options,
-                        headers: {
-                            ...defaultHeaders,
-                            ...options.headers
+                    try {
+                        const resp = await fetch(JSONBIN_API_URL, {
+                            ...options,
+                            headers: {
+                                ...defaultHeaders,
+                                ...options.headers
+                            }
+                        });
+
+                        if (!resp.ok) {
+                            // 克隆并读取响应体以便调试，但仍返回原始响应给调用方
+                            try {
+                                const text = await resp.clone().text();
+                                console.error('JSONBin 请求失败', resp.status, text);
+                            } catch (e) {
+                                console.error('读取错误响应体失败', e);
+                            }
                         }
-                    });
+
+                        return resp;
+                    } catch (err) {
+                        console.error('fetchJsonBin 网络或 CORS 错误:', err);
+                        throw err;
+                    }
                 }
                 // ====== 配置区 结束 ======
         // 全局变量

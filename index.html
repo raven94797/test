@@ -1245,9 +1245,22 @@ document.addEventListener('DOMContentLoaded', function() {
             // 4. 初始化评论表单事件
             initCommentForm();
             
-            // 5. 加载已有的评论
-            loadComments();
-        });
+                // 5. 先加载自定义时间轴节点，再初始化可评论文本并加载评论
+                loadCustomTimelineItems().then(() => {
+                    initCommentableText();
+                    loadComments();
+                    // 确保编辑按钮在自定义节点渲染后添加
+                    setTimeout(() => {
+                        addEditButtonsToExistingItems();
+                    }, 500);
+                }).catch(err => {
+                    console.error('加载自定义节点失败（首次）:', err);
+                    // 回退到默认初始化顺序
+                    initCommentableText();
+                    loadComments();
+                    setTimeout(() => { addEditButtonsToExistingItems(); }, 500);
+                });
+            });
 
         // 爱心雨背景效果函数
         function startHeartRain() {
@@ -2229,14 +2242,8 @@ function createTimelineItemElement(item) {
 }
 
 // 页面加载时检查并加载已有的自定义节点
-document.addEventListener('DOMContentLoaded', function() {
-    loadCustomTimelineItems();
-    
-    // 为现有时间轴节点添加编辑按钮
-    setTimeout(() => {
-        addEditButtonsToExistingItems();
-    }, 500);
-});
+// loadCustomTimelineItems is invoked earlier during DOMContentLoaded to ensure
+// custom nodes are present before initializing comment bindings.
 
 // 为现有时间轴节点添加编辑按钮
 function addEditButtonsToExistingItems() {

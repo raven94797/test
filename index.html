@@ -1524,7 +1524,7 @@
                 timestamp: new Date().toLocaleString('zh-CN')
             };
             
-            // 保存到localStorage
+                // 保存到localStorage
             saveComment(comment);
             
             // 在页面上显示评论
@@ -1533,17 +1533,6 @@
             // 关闭弹窗
             closeCommentModal();
         }
-
-                // 保存评论到 JSONBin
-        async function saveComment(comment) {
-            try {
-                // 先保存到本地
-                let comments = JSON.parse(localStorage.getItem('timelineComments') || '[]');
-                comments.push(comment);
-                localStorage.setItem('timelineComments', JSON.stringify(comments));
-                
-                // 已移除：旧的直接 PUT 实现（使用文件底部的合并式 saveComment）
-                // 新的实现会先 GET 完整记录、合并 comments 后 PUT，以避免覆盖 timeline
                 // 显示状态提示
         function showStatus(message, isSuccess = true) {
             const indicator = document.getElementById('statusIndicator');
